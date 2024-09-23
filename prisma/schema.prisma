@@ -12,19 +12,34 @@ datasource db {
 
 model Product {
   id String @id @default(uuid())
-  name                String
-  priceInCents        priceInCents
-  filePath            String
-  imagePath           String
-  description         String
-  isAvailableForPurchase String    @default(true)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  name                   String
+  priceInCents           Int
+  filePath               String
+  imagePath              String
+  description            String
+  isAvailableForPurchase Boolean       @default(true)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  orders                 Order[]
 }
 
 model User {
-  id      String @id @default(uuid())
-  email   String @unique
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id          String    @id      @default(uuid())
+  email       String    @unique
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  orders      Order[]
+}
+
+
+model Order {
+  id                String   @id    @default(uuid())
+  pricePaidInCents  Int 
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now())
+
+  userId           String
+  productId        String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields:[productId], references: [id], onDelete: Restrict)
 }
