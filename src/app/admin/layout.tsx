@@ -12,7 +12,7 @@ export default function AdminLayout({
         <NavLink href="/admin/users">Users</NavLink>
         <NavLink href="/admin/orders">Orders</NavLink>
     </Nav>
-    <div className="container my-6">
+    <div className=""> {/* <div className="container my-6"> */}
         {children}
     </div>
     </>

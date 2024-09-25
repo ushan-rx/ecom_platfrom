@@ -35,22 +35,42 @@ async function getUserData(){
     }
 }
 
+async function getProductData(){
+    const [activeCount, inactiveCount] = await Promise.all([
+        db.product.count({ where: {isAvailableForPurchase: true}}),
+        db.product.count({ where: {isAvailableForPurchase: false}})
+    ])
+
+    return {
+        activeCount,
+        inactiveCount
+    }
+}
+
+
+
 export default async function AdminDashboard(){
-    const [salesData, userData] = await Promise.all([
+    const [salesData, userData, productData] = await Promise.all([
         getSalesData(),
-        getUserData()
+        getUserData(),
+        getProductData()
     ])
     
-    return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
        <DashboardCard 
             title="Products"
             description={formatNumber(salesData.numberOfSales)}
             body={formatCurrency(salesData.amount)}
         />
         <DashboardCard 
-            title="Customer"
+            title="Customers"
             description={`${formatNumber(userData.averageValuePerUser)} Average Value`}
             body={formatCurrency(userData.userCount)}
+        />
+        <DashboardCard
+            title="Active Products"
+            description={`${formatNumber(productData.inactiveCount)} Inactive`}
+            body={formatNumber(productData.activeCount)}
         />
     </div>
 }
