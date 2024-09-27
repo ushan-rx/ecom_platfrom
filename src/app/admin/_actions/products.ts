@@ -31,8 +31,8 @@ export async function addProduct(prevState: unknown, formData: FormData){
     const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`
     await fs.writeFile(`public${imagePath}`, 
         Buffer.from(await data.image.arrayBuffer()))  //get the file and convert into node buffer to write in a file
-    
-    db.product.create({ data:{
+
+    await db.product.create({ data:{
         isAvailableForPurchase: true,
         name: data.name,
         description: data.description,
@@ -40,6 +40,7 @@ export async function addProduct(prevState: unknown, formData: FormData){
         filePath,
         imagePath
     }})
+
 
     redirect('/admin/products')
 }
