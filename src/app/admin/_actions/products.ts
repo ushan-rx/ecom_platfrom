@@ -16,7 +16,7 @@ const addSchema = z.object({
     image: imageSchema.refine(file => file.size > 0, "required")
 })
 
-export async function addProduct(formData: FormData){
+export async function addProduct(prevState: unknown, formData: FormData){
     const result = addSchema.safeParse(Object.fromEntries(formData.entries()));  // to parse the form data into an object
     if(result.success === false){  // if the form data are not valid
         return result.error.formErrors.fieldErrors   // to return the errors from each field in the form
@@ -28,10 +28,12 @@ export async function addProduct(formData: FormData){
     await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()))
 
     await fs.mkdir("public/products", {recursive: true})  // to create a directory for the products  
-    const imagePath = `products/${crypto.randomUUID()}-${data.image.name}`
-    await fs.writeFile(`public${imagePath}`, Buffer.from(await data.image.arrayBuffer()))
+    const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`
+    await fs.writeFile(`public${imagePath}`, 
+        Buffer.from(await data.image.arrayBuffer()))  //get the file and convert into node buffer to write in a file
     
     db.product.create({ data:{
+        isAvailableForPurchase: true,
         name: data.name,
         description: data.description,
         priceInCents: data.priceInCents,
@@ -39,5 +41,5 @@ export async function addProduct(formData: FormData){
         imagePath
     }})
 
-    redirect('admin/products')
+    redirect('/admin/products')
 }
