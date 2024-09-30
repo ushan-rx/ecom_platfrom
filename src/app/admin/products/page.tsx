@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import db from "@/db/db";
 import { CheckCircle2, MoreVertical, XCircle } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/lib/formatters";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ActiveToggleDropdownItem, DeleteDropdownItem } from "../_components/ProductActions";
 
 export default function AdminProductsPage(){
     return (
@@ -60,7 +61,7 @@ async function ProductsTable(){
                             ): (
                                 <>
                                     <span className="sr-only">Not Available</span>
-                                    <XCircle></XCircle>
+                                    <XCircle className="stroke-destructive"></XCircle>
                                 </>
                             )
                             }
@@ -91,6 +92,15 @@ async function ProductsTable(){
                                             Edit
                                         </Link>
                                     </DropdownMenuItem>
+                                    <ActiveToggleDropdownItem 
+                                        id={product.id}
+                                        isAvailableForPurchase = {product.isAvailableForPurchase}
+                                    />
+                                    <DropdownMenuSeparator/>
+                                    <DeleteDropdownItem 
+                                        id={product.id}
+                                        disabled = {product._count.orders > 0}
+                                    />
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </TableCell>
