@@ -16,6 +16,11 @@ const addSchema = z.object({
     image: imageSchema.refine(file => file.size > 0, "required")
 })
 
+const editSchema = addSchema.extend({
+    file: fileSchema.optional(),
+    image: imageSchema.optional()
+})
+
 export async function addProduct(prevState: unknown, formData: FormData){
     const result = addSchema.safeParse(Object.fromEntries(formData.entries()));  // to parse the form data into an object
     if(result.success === false){  // if the form data are not valid
@@ -33,7 +38,7 @@ export async function addProduct(prevState: unknown, formData: FormData){
         Buffer.from(await data.image.arrayBuffer()))  //get the file and convert into node buffer to write in a file
 
     await db.product.create({ data:{
-        isAvailableForPurchase: true,
+        isAvailableForPurchase: false,
         name: data.name,
         description: data.description,
         priceInCents: data.priceInCents,
@@ -44,7 +49,6 @@ export async function addProduct(prevState: unknown, formData: FormData){
 
     redirect('/admin/products')
 }
-
 
 export async function  toggleProductAvailability(
     id: string,
@@ -62,4 +66,42 @@ export async function deleteProduct(id: string){
 
     await fs.unlink(product.filePath);
     await fs.unlink(`public${product.imagePath}`);
+}
+
+export async function updateProduct(id: string, prevState: unknown, formData: FormData){
+    const result = editSchema.safeParse(Object.fromEntries(formData.entries()));  // to parse the form data into an object
+    if(result.success === false){  // if the form data are not valid
+        return result.error.formErrors.fieldErrors   // to return the errors from each field in the form
+    }
+    const data = result.data;
+    const product = await db.product.findUnique({where: {id}});
+    if(product == null) return notFound();
+
+    let filePath = product.filePath;
+    if(data.file != null && data.file.size > 0){
+        await fs.unlink(product.filePath);
+        filePath = `products/${crypto.randomUUID()}-${data.file.name}`
+        await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()))
+    } 
+    
+    let imagePath = product.imagePath;
+    if(data.image != null && data.image.size > 0){
+        await fs.unlink(`public${product.imagePath}`);
+        imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`
+        await fs.writeFile(`public${imagePath}`, 
+            Buffer.from(await data.image.arrayBuffer()))  //get the file and convert into node buffer to write in a file
+    }
+
+    await db.product.update({ 
+        where: {id},
+        data:{
+            name: data.name,
+            description: data.description,
+            priceInCents: data.priceInCents,
+            filePath,
+            imagePath
+    }})
+
+
+    redirect('/admin/products')
 }
