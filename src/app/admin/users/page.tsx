@@ -22,7 +22,7 @@ function getUsers(){
 export default function UsersPage(){
     return (
         <>
-        <div className="flex justify-between items-center gap-4">
+        <div>
             <PageHeader>Customers</PageHeader>
             <UsersTable/>
         </div>
