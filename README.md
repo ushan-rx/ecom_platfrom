@@ -1,7 +1,8 @@
 This is a simple [Next.js](https://nextjs.org) project I did to practice fullstack development using Next.js with, 
 - prisma as ORM
 - SQL lite as DB
-- with Stripe API integration.
+- Resend as email service
+- & Stripe API integration.
 
 ## Getting Started
 
